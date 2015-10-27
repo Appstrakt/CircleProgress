@@ -33,6 +33,7 @@ public class ArcProgress extends View {
     private int finishedStrokeColor;
     private int unfinishedStrokeColor;
     private float arcAngle;
+    private float arcStartAngle;
     private String suffixText = "%";
     private float suffixTextPadding;
 
@@ -48,6 +49,7 @@ public class ArcProgress extends View {
     private final String default_suffix_text;
     private final int default_max = 100;
     private final float default_arc_angle = 360 * 0.8f;
+    private final float default_arc_start_angle = 180;
     private float default_text_size;
     private final int min_size;
 
@@ -64,6 +66,7 @@ public class ArcProgress extends View {
     private static final String INSTANCE_FINISHED_STROKE_COLOR = "finished_stroke_color";
     private static final String INSTANCE_UNFINISHED_STROKE_COLOR = "unfinished_stroke_color";
     private static final String INSTANCE_ARC_ANGLE = "arc_angle";
+    private static final String INSTANCE_ARC_START_ANGLE = "arc_start_angle";
     private static final String INSTANCE_SUFFIX = "suffix";
 
     public ArcProgress(Context context) {
@@ -99,6 +102,7 @@ public class ArcProgress extends View {
         textColor = attributes.getColor(R.styleable.ArcProgress_arc_text_color, default_text_color);
         textSize = attributes.getDimension(R.styleable.ArcProgress_arc_text_size, default_text_size);
         arcAngle = attributes.getFloat(R.styleable.ArcProgress_arc_angle, default_arc_angle);
+        arcStartAngle = attributes.getFloat(R.styleable.ArcProgress_arc_start_angle, default_arc_start_angle);
         setMax(attributes.getInt(R.styleable.ArcProgress_arc_max, default_max));
         setProgress(attributes.getInt(R.styleable.ArcProgress_arc_progress, 0));
         strokeWidth = attributes.getDimension(R.styleable.ArcProgress_arc_stroke_width, default_stroke_width);
@@ -233,6 +237,15 @@ public class ArcProgress extends View {
         this.invalidate();
     }
 
+    public float getArcStartAngle() {
+        return arcStartAngle;
+    }
+
+    public void setArcStartAngle(float arcStartAngle) {
+        this.arcStartAngle = arcStartAngle;
+        this.invalidate();
+    }
+
     public String getSuffixText() {
         return suffixText;
     }
@@ -274,7 +287,7 @@ public class ArcProgress extends View {
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-        float startAngle = 270 - arcAngle / 2f;
+        float startAngle = (arcAngle / 2f + getArcStartAngle() + 90) % 360;
         float finishedSweepAngle = progress / (float) getMax() * arcAngle;
         float finishedStartAngle = startAngle;
         paint.setColor(unfinishedStrokeColor);
@@ -317,6 +330,7 @@ public class ArcProgress extends View {
         bundle.putInt(INSTANCE_FINISHED_STROKE_COLOR, getFinishedStrokeColor());
         bundle.putInt(INSTANCE_UNFINISHED_STROKE_COLOR, getUnfinishedStrokeColor());
         bundle.putFloat(INSTANCE_ARC_ANGLE, getArcAngle());
+        bundle.putFloat(INSTANCE_ARC_START_ANGLE, getArcStartAngle());
         bundle.putString(INSTANCE_SUFFIX, getSuffixText());
         return bundle;
     }
