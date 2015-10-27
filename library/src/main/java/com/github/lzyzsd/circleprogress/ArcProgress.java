@@ -26,6 +26,7 @@ public class ArcProgress extends View {
     private float suffixTextSize;
     private float bottomTextSize;
     private String bottomText;
+    private boolean textVisible;
     private float textSize;
     private int textColor;
     private int progress = 0;
@@ -41,6 +42,7 @@ public class ArcProgress extends View {
 
     private final int default_finished_color = Color.WHITE;
     private final int default_unfinished_color = Color.rgb(72, 106, 176);
+    private final boolean default_text_visible = true;
     private final int default_text_color = Color.rgb(66, 145, 241);
     private final float default_suffix_text_size;
     private final float default_suffix_padding;
@@ -55,6 +57,7 @@ public class ArcProgress extends View {
 
     private static final String INSTANCE_STATE = "saved_instance";
     private static final String INSTANCE_STROKE_WIDTH = "stroke_width";
+    private static final String INSTANCE_TEXT_VISIBLE = "text_visible";
     private static final String INSTANCE_SUFFIX_TEXT_SIZE = "suffix_text_size";
     private static final String INSTANCE_SUFFIX_TEXT_PADDING = "suffix_text_padding";
     private static final String INSTANCE_BOTTOM_TEXT_SIZE = "bottom_text_size";
@@ -99,6 +102,7 @@ public class ArcProgress extends View {
     protected void initByAttributes(TypedArray attributes) {
         finishedStrokeColor = attributes.getColor(R.styleable.ArcProgress_arc_finished_color, default_finished_color);
         unfinishedStrokeColor = attributes.getColor(R.styleable.ArcProgress_arc_unfinished_color, default_unfinished_color);
+        textVisible = attributes.getBoolean(R.styleable.ArcProgress_arc_text_visible, default_text_visible);
         textColor = attributes.getColor(R.styleable.ArcProgress_arc_text_color, default_text_color);
         textSize = attributes.getDimension(R.styleable.ArcProgress_arc_text_size, default_text_size);
         arcAngle = attributes.getFloat(R.styleable.ArcProgress_arc_angle, default_arc_angle);
@@ -190,6 +194,15 @@ public class ArcProgress extends View {
     public void setBottomTextSize(float bottomTextSize) {
         this.bottomTextSize = bottomTextSize;
         this.invalidate();
+    }
+
+    public boolean isTextVisible() {
+        return textVisible;
+    }
+
+    public void setTextVisible(boolean textVisible) {
+        this.textVisible = textVisible;
+        invalidate();
     }
 
     public float getTextSize() {
@@ -296,7 +309,7 @@ public class ArcProgress extends View {
         canvas.drawArc(rectF, finishedStartAngle, finishedSweepAngle, false, paint);
 
         String text = String.valueOf(getProgress());
-        if (!TextUtils.isEmpty(text)) {
+        if (!TextUtils.isEmpty(text) && isTextVisible()) {
             textPaint.setColor(textColor);
             textPaint.setTextSize(textSize);
             float textHeight = textPaint.descent() + textPaint.ascent();
@@ -307,7 +320,7 @@ public class ArcProgress extends View {
             canvas.drawText(suffixText, getWidth() / 2.0f  + textPaint.measureText(text) + suffixTextPadding, textBaseline + textHeight - suffixHeight, textPaint);
         }
 
-        if (!TextUtils.isEmpty(getBottomText())) {
+        if (!TextUtils.isEmpty(getBottomText()) && isTextVisible()) {
             textPaint.setTextSize(bottomTextSize);
             float bottomTextBaseline = getHeight() - arcBottomHeight - (textPaint.descent() + textPaint.ascent()) / 2;
             canvas.drawText(getBottomText(), (getWidth() - textPaint.measureText(getBottomText())) / 2.0f, bottomTextBaseline, textPaint);
@@ -319,6 +332,7 @@ public class ArcProgress extends View {
         final Bundle bundle = new Bundle();
         bundle.putParcelable(INSTANCE_STATE, super.onSaveInstanceState());
         bundle.putFloat(INSTANCE_STROKE_WIDTH, getStrokeWidth());
+        bundle.putBoolean(INSTANCE_TEXT_VISIBLE, isTextVisible());
         bundle.putFloat(INSTANCE_SUFFIX_TEXT_SIZE, getSuffixTextSize());
         bundle.putFloat(INSTANCE_SUFFIX_TEXT_PADDING, getSuffixTextPadding());
         bundle.putFloat(INSTANCE_BOTTOM_TEXT_SIZE, getBottomTextSize());
@@ -340,6 +354,7 @@ public class ArcProgress extends View {
         if(state instanceof Bundle) {
             final Bundle bundle = (Bundle) state;
             strokeWidth = bundle.getFloat(INSTANCE_STROKE_WIDTH);
+            textVisible = bundle.getBoolean(INSTANCE_TEXT_VISIBLE);
             suffixTextSize = bundle.getFloat(INSTANCE_SUFFIX_TEXT_SIZE);
             suffixTextPadding = bundle.getFloat(INSTANCE_SUFFIX_TEXT_PADDING);
             bottomTextSize = bundle.getFloat(INSTANCE_BOTTOM_TEXT_SIZE);
